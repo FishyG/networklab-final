@@ -1,0 +1,63 @@
+version: "6.9"
+
+services:
+  influxdb:
+    container_name: influxdb  
+    image: "influxdb:1.8"
+    networks:
+      - dockernet
+    ports:
+      - 8083:8083
+      - 8086:8086
+      - 8089:8089/udp      
+    volumes:
+      - ./influx/data:/var/lib/influxdb
+        #- type: bind
+        #source: ./influx/config
+        #target: /opt/app/static
+    environment:
+      - INFLUXDB_DB=LabFinal 
+      - INFLUXDB_ADMIN_USER=admin
+      - INFLUXDB_ADMIN_PASSWORD=admin
+      - INFLUXDB_USER=duck
+      - INFLUXDB_PASSWORD=duckyQuack
+    restart: unless-stopped  
+
+  grafana:
+    container_name: grafana
+    image: "grafana/grafana:8.2.6"
+    user: "104"
+    networks:
+      - dockernet
+    ports:
+      - 80:3000
+    volumes:    
+      #- ./grafana:/var/lib/grafana
+      - ./grafana/provisioning:/var/lib/grafana/provisioning
+    depends_on:
+      - influxdb    
+    restart: unless-stopped 
+
+  mosquitto:
+    container_name: mosquitto  
+    image: "eclipse-mosquitto:1.6.15"
+    networks:
+      - dockernet
+    ports:
+      - 1883:1883
+      - 9001:9001
+    restart: unless-stopped  
+
+  telegraf:
+    container_name: telegraf  
+    image: "telegraf:1.20"
+    networks:
+      - dockernet
+    ports:
+      - 8125:8125/udp
+    depends_on:
+      - influxdb
+    restart: unless-stopped  
+
+networks:
+  dockernet:

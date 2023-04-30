@@ -12,15 +12,20 @@ services:
       - 8089:8089/udp      
     volumes:
       - ./influx/data:/var/lib/influxdb
+      - ./influx/init.db/init.iql:/docker-entrypoint-initdb.d/init.iql
         #- type: bind
         #source: ./influx/config
         #target: /opt/app/static
     environment:
-      - INFLUXDB_DB=LabFinal 
-      - INFLUXDB_ADMIN_USER=admin
-      - INFLUXDB_ADMIN_PASSWORD=admin
-      - INFLUXDB_USER=duck
-      - INFLUXDB_PASSWORD=duckyQuack
+      # - INFLUXDB_DB=LabFinal 
+      # - INFLUXDB_ADMIN_USER=admin_xD
+      # - INFLUXDB_ADMIN_PASSWORD=not_the_admin_password_just_a_duck_xDDDDD_Quack_Quack
+      # - INFLUXDB_USER=duck
+      # - INFLUXDB_PASSWORD=duckyQuack
+      - INFLUXDB_ADMIN_USER=r2
+      - INFLUXDB_ADMIN_PASSWORD=r2d2
+      - INFLUXDB_USER=r2
+      - INFLUXDB_PASSWORD=r2d2
     restart: unless-stopped  
 
   grafana:
@@ -45,7 +50,9 @@ services:
       - dockernet
     ports:
       - 1883:1883
-      - 9001:9001
+    volumes:
+      - ./mosquitto/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/passwd:/mosquitto/config/passwd
     restart: unless-stopped  
 
   telegraf:
@@ -55,6 +62,8 @@ services:
       - dockernet
     ports:
       - 8125:8125/udp
+    volumes:
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf
     depends_on:
       - influxdb
     restart: unless-stopped  
